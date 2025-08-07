@@ -22,6 +22,8 @@
     "autogiveaway_settings_a2": "You can only join up to 20 giveaways per day",
     "autogiveaway_settings_p5": "Minimum Amount",
     "autogiveaway_settings_a5": "Minimum amount of the giveaway",
+    "autogiveaway_settings_p6": "Search pages",
+    "autogiveaway_settings_a6": "Number of pages to scan for giveaways",
     "autogiveaway_settings_p3": "Won Giveaways",
     "autogiveaway_settings_a3": "Counted won giveaways",
     "autogiveaway_settings_p4": "Earnings from Giveaways",

@@ -1,5 +1,6 @@
 let giveawayInterval = null;
-const refreshGiveawayTime =  45 * 1000;
+const refreshGiveawayTime = 45 * 1000;
+const getRefreshDelay = () => refreshGiveawayTime + Math.floor(Math.random() * 10 * 1000);
 
 const giveawayStart = async(isFirst) => {
     const config = await getConfigData();
@@ -37,7 +38,7 @@ const runAutoGiveaway = async(language, port, currentRate, isFirst) => {
     //const waitingTime = (autoGiveawayConfig?.currentGiveaway?.deadlineTimestamp - new Date().getTime()) + Math.floor(Math.random() * 60000) + 60000;
     setTimeout(async() => {
         return runAutoGiveaway(language, port, currentRate);
-    }, refreshGiveawayTime);// waitingTime > 0 ? waitingTime : (15 * 60 * 1000));
+    }, getRefreshDelay());// waitingTime > 0 ? waitingTime : (15 * 60 * 1000));
 };
 
 const getGiveawayData = async(language, gConfig, port, token) => {
@@ -81,10 +82,15 @@ const getGiveawayData = async(language, gConfig, port, token) => {
 };
 
 const findNewGiveaway = async(gConfig, port, token) => {
-    const fetch = JSON.parse(JSON.stringify(await fetchUrl('GET', `https://wss-${port || 2061}.key-drop.com/v1/giveaway//list?type=active&page=0&perPage=5&status=active&sort=latest`, token)));
-    if(!fetch || !fetch?.data) return createToast('error', 'error_fetch');
+    const pages = gConfig?.pagesToCheck || 1;
+    let amateurGiveaways = null;
 
-    const amateurGiveaways = fetch?.data?.find(el => el?.frequency == 'amateur');
+    for(let page = 0; page < pages && !amateurGiveaways; page++) {
+        const fetch = JSON.parse(JSON.stringify(await fetchUrl('GET', `https://wss-${port || 2061}.key-drop.com/v1/giveaway//list?type=active&page=${page}&perPage=5&status=active&sort=latest`, token)));
+        if(!fetch || !fetch?.data) continue;
+        amateurGiveaways = fetch?.data?.find(el => el?.frequency == 'amateur');
+    }
+
     if(!amateurGiveaways) return createToast('error', 'error_fetch');
 
     gConfig.currentGiveaway.id = amateurGiveaways?.id;
