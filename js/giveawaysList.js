@@ -106,7 +106,7 @@ const refreshGiveawaysPanel = async(panelText) => {
   if(!config?.active) return;
 
   const index = await getIndexData();
-  let giveawaysHistory = await getStorageData('local', 'giveawaysHistory');
+  let giveawaysHistory = await getStorageData('local', 'giveawaysHistory', []);
 
   const userSkins = await getUserSkinsData(config?.token); 
   const giveawayWinnersTab = userSkins?.length !== 0 ? userSkins?.filter(el => el?.sourceType == 'giveaway') : [];
