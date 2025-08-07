@@ -12,15 +12,33 @@ $('body').append($(document.createElement('div'))
     .css({ position: 'fixed', right: 0, 'margin-right': '10px', 'margin-bottom': '11px', bottom: 0, 'z-index': 999 })
 );
 
-const fetchUrl = async(type, url, token, noTime, data) => {
+const defaultFetchTimeout = 15 * 1000;
+
+/**
+ * Perform a network request with optional authorization and body data.
+ * Automatically appends a timestamp to bust caches unless `noTime` is true.
+ *
+ * @param {string} type       HTTP method
+ * @param {string} url        Target URL
+ * @param {string|false} token Optional bearer token
+ * @param {boolean} noTime    Skip timestamp parameter
+ * @param {Object} [data]     JSON body payload
+ * @param {Object} [options]  Additional options (timeout, headers)
+ * @returns {Promise<*>}      Parsed JSON/text response or null on error
+ */
+const fetchUrl = async(type, url, token, noTime, data, options = {}) => {
+    const { timeout = defaultFetchTimeout, headers = {} } = options;
     try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 15 * 1000);
-        const response = await fetch(`${url}${noTime ? '' : `?t=${Date.now()}`}`, {
+        const timer = setTimeout(() => controller.abort(), timeout);
+        const requestUrl = new URL(url);
+        if(!noTime) requestUrl.searchParams.set('t', Date.now());
+        const response = await fetch(requestUrl.toString(), {
             method: type,
             headers: {
-                'Content-Type': data ? 'application/json' : undefined,
-                ...(token ? { authorization: `Bearer ${token}` } : {})
+                ...(data ? { 'Content-Type': 'application/json' } : {}),
+                ...(token ? { authorization: `Bearer ${token}` } : {}),
+                ...headers
             },
             body: data ? JSON.stringify(data) : undefined,
             signal: controller.signal
@@ -29,25 +47,39 @@ const fetchUrl = async(type, url, token, noTime, data) => {
         if(response.status === 403) {
             return window?.location?.reload();
         }
-        const contentType = response.headers.get('content-type');
-        if(contentType && contentType.includes('application/json'))
-            return await response.json();
-        return await response.text();
+        if(!response.ok) return null;
+        const contentType = response.headers.get('content-type') || '';
+        return contentType.includes('application/json') ? await response.json() : await response.text();
     } catch(e) {
         return null;
     }
 };
 
-const getStorageData = async(type, name) => {
+/**
+ * Retrieve a value from browser storage.
+ *
+ * @param {'local'|'sync'|0|1} type  Storage type
+ * @param {string} name             Key name
+ * @param {*} [defaultValue]        Value to return if key does not exist
+ * @returns {Promise<*>}           Stored value or defaultValue
+ */
+const getStorageData = async(type, name, defaultValue) => {
     try {
         const storage = (type === 'local' || type === 0) ? chrome.storage.local : chrome.storage.sync;
         const result = await storage.get([name]);
-        return result[name];
+        return result[name] ?? defaultValue;
     } catch(e) {
-        return;
+        return defaultValue;
     }
 };
 
+/**
+ * Save data to browser storage.
+ *
+ * @param {'local'|'sync'|0|1} type Storage type
+ * @param {Object} data            Data to store
+ * @returns {Promise<boolean>}     True on success
+ */
 const setStorageData = async(type, data) => {
     try {
         const storage = (type === 'local' || type === 0) ? chrome.storage.local : chrome.storage.sync;
@@ -56,6 +88,12 @@ const setStorageData = async(type, data) => {
     } catch(e) { return false; }
 };
 
+/**
+ * Clear all data from a storage area.
+ *
+ * @param {'local'|'sync'|0|1} type Storage type
+ * @returns {Promise<boolean>}     True on success
+ */
 const clearStorageData = async(type) => {
     try {
         const storage = (type === 'local' || type === 0) ? chrome.storage.local : chrome.storage.sync;
@@ -64,6 +102,12 @@ const clearStorageData = async(type) => {
     } catch(e) { return false; }
 };
 
+/**
+ * Retrieve user index data from storage or remote endpoint.
+ * Cached values expire after a predefined period.
+ *
+ * @returns {Promise<Object|undefined>} Index data object
+ */
 const getIndexData = async() => {
     const storageData = await getStorageData(1, 'index');
     if(storageData?.expires >= new Date().getTime()) return storageData;
@@ -81,6 +125,11 @@ const getIndexData = async() => {
     return indexData;
 };
 
+/**
+ * Load extension configuration and validate token expiration.
+ *
+ * @returns {Promise<Object>} Configuration data
+ */
 const getConfigData = async() => {
     const storageData = await getStorageData(1, 'config');
     const configData = {
@@ -113,6 +162,12 @@ const getConfigData = async() => {
     return refreshedConfigData;
 };
 
+/**
+ * Refresh authorization token when expired and persist it.
+ *
+ * @param {Object} config Current configuration
+ * @returns {Promise<Object>} Updated configuration
+ */
 const checkToken = async(config) => {
     const timestamp = new Date().getTime();
     if(!config?.token || timestamp >= config?.tokenExp) {
@@ -168,6 +223,11 @@ const getCurrency = async() => {
     return currency || 'USD';
 }
 
+/**
+ * Retrieve auto-giveaway configuration or initialize defaults.
+ *
+ * @returns {Promise<Object>} Auto-giveaway configuration
+ */
 const getAutoGiveawayConfigData = async() => {
     const storageData = await getStorageData(1, 'autoGiveawayConfig');
     if(storageData) {
@@ -190,6 +250,12 @@ const getAutoGiveawayConfigData = async() => {
     return autoGiveawayConfigData;
 };
 
+/**
+ * Fetch paginated list of user skins.
+ *
+ * @param {string} token Authorization token
+ * @returns {Promise<Array|undefined>} Array of skin data
+ */
 const getUserSkinsData = async(token) => {
     let currentPage = 1;
     let totalUserSkins = 1;
@@ -197,7 +263,7 @@ const getUserSkinsData = async(token) => {
     const totalMaxSkins = 999;
 
     do {
-        const fetch = await fetchUrl('GET', `https://key-drop.com/en/panel/profil/my_winner_list?type=all&sort=newest&state=all&per_page=${totalMaxSkins}&current_page=${currentPage}?t=${new Date().getTime()}`, token);
+        const fetch = await fetchUrl('GET', `https://key-drop.com/en/panel/profil/my_winner_list?type=all&sort=newest&state=all&per_page=${totalMaxSkins}&current_page=${currentPage}`, token);
         if(!fetch || !fetch?.total || fetch?.data?.length <= 0) return;
         totalUserSkins = fetch?.total || 1;
         if(currentPage == 1) userSkinsArray = fetch?.data;
