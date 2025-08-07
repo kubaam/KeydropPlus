@@ -57,11 +57,13 @@ const createGiveawayListPanel = async() => {
     endDate: language?.autogiveaway_endDate,
   };
 
-  $('#main-view div.min-h-screen.pb-16 div.container').eq(2)
-    .after($(document.createElement('div'))
-      .addClass('container giveaway-keydropPlus-info')
-      .html(`<div class="order-3 mt-12 mb-6 flex w-full flex-row items-center justify-between border-b border-grey-700 lg:order-2">    <div class="-mb-px w-[12.5rem] border-b border-navy-100 pt-3 pb-4 text-navy-100 sm:w-[15.675rem]"><div class="flex items-center" style="    float: left;"><div class="mr-3 h-6 w-6"><img src="${githubUrl}${serverData?.iconsPath}KD%2B_Icon.svg" style="    position: absolute;    background: darkorange;    width: 24px;    height: 24px;    padding: 3px;    border-radius: 50%;"></div>Keydrop Plus</div></div></div><div class="h-[23rem] overflow-hidden" style="height: auto;">    <div style="    float: left;    width: 28%;"><h3 class="mb-3 text-center text-xl font-bold uppercase" style="    margin-bottom: 20px;">${panelText?.settings}</h3>    <p>${panelText?.settings_p1}<label class="switch kdp-button" style="    margin-left: 22.6%;">  <input id="notificationSwitch" type="checkbox">  <span class="slider round" style=""></span></label></p>    <a class="desc">${panelText?.settings_a1}</a><p>${panelText?.settings_p5}: <input placeholder="0" value="0" min="0" max="999" type="number" id="giveawayMinPrice"><a style="color: darkseagreen;" id="giveawayMinPriceCurrency"> PLN</a></p><a class="desc">${panelText?.settings_a5}</a><p>${panelText?.settings_p3}: <a style="color: darkseagreen;" id="giveawayWinnersCount">N/A</a></p><a class="desc">${panelText?.settings_a3}</a><p>${panelText?.settings_p4}: <a style="    color: darkseagreen;" id="giveawayWinnersPrice">N/A</a></p><a class="desc">${panelText?.settings_a4}</a><button id="autoGiveawayButton" class="button ml-2.5 h-11 w-28 px-3.5 text-[10px] sm:ml-4 button-light-green" style="font-weight: bolder;width: 170px;margin-left: calc(50% - 85px);margin-top: 15px;margin-bottom: 15px;">${panelText?.start}</button><a class="desc" style="    font-size: 11px;">${panelText?.settings_desc}</a></div><div style="    float: left;    width: 72%;"><div class="pb-3"><h3 class="mb-3 text-center text-xl font-bold uppercase">${panelText?.history}</h3><div class="scroll-container custom-scrollbar overflow-auto css-nqdl3y" style="    border: 1px solid #a9a9a914;    border-radius: 20px;    max-height: 375px;"><table id="giveawaysListTable" class="w-full table-fixed text-xs leading-none text-navy-200 css-s83462"><thead style="    background: #ffffff0a;"><tr class="text-left uppercase"><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.id}</th><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.salary}</th><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.joined2}</th><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.endDate}</th></tr></thead><tbody id="giveawaysHistoryTd"></tbody></table></div></div></div></div>`)
-    ) // <p><a>${panelText?.settings_p2}: </a><a style="color: darkseagreen;" id="giveawayJoinsCount">0</a></p><a class="desc">${panelText?.settings_a2}</a>
+    $('#main-view div.min-h-screen.pb-16 div.container').eq(2)
+      .after($(document.createElement('div'))
+        .addClass('container giveaway-keydropPlus-info')
+        .html(`<div class="order-3 mt-12 mb-6 flex w-full flex-row items-center justify-between border-b border-grey-700 lg:order-2">    <div class="-mb-px w-[12.5rem] border-b border-navy-100 pt-3 pb-4 text-navy-100 sm:w-[15.675rem]"><div class="flex items-center" style="    float: left;"><div class="mr-3 h-6 w-6"><img src="${githubUrl}${serverData?.iconsPath}KD%2B_Icon.svg" style="    position: absolute;    background: darkorange;    width: 24px;    height: 24px;    padding: 3px;    border-radius: 50%;"></div>Keydrop Plus</div></div></div><div class="h-[23rem] overflow-hidden" style="height: auto;">    <div style="    float: left;    width: 28%;"><h3 class="mb-3 text-center text-xl font-bold uppercase" style="    margin-bottom: 20px;">${panelText?.settings}</h3>    <p>${panelText?.settings_p1}<label class="switch kdp-button" style="    margin-left: 22.6%;">  <input id="notificationSwitch" type="checkbox">  <span class="slider round" style=""></span></label></p>    <a class="desc">${panelText?.settings_a1}</a><p>${panelText?.settings_p5}: <input placeholder="0" value="0" min="0" max="999" type="number" id="giveawayMinPrice"><a style="color: darkseagreen;" id="giveawayMinPriceCurrency"> PLN</a></p><a class="desc">${panelText?.settings_a5}</a><div id="giveawayPagesWrapper"></div><p>${panelText?.settings_p3}: <a style="color: darkseagreen;" id="giveawayWinnersCount">N/A</a></p><a class="desc">${panelText?.settings_a3}</a><p>${panelText?.settings_p4}: <a style="    color: darkseagreen;" id="giveawayWinnersPrice">N/A</a></p><a class="desc">${panelText?.settings_a4}</a><button id="autoGiveawayButton" class="button ml-2.5 h-11 w-28 px-3.5 text-[10px] sm:ml-4 button-light-green" style="font-weight: bolder;width: 170px;margin-left: calc(50% - 85px);margin-top: 15px;margin-bottom: 15px;">${panelText?.start}</button><a class="desc" style="    font-size: 11px;">${panelText?.settings_desc}</a></div><div style="    float: left;    width: 72%;"><div class="pb-3"><h3 class="mb-3 text-center text-xl font-bold uppercase">${panelText?.history}</h3><div class="scroll-container custom-scrollbar overflow-auto css-nqdl3y" style="    border: 1px solid #a9a9a914;    border-radius: 20px;    max-height: 375px;"><table id="giveawaysListTable" class="w-full table-fixed text-xs leading-none text-navy-200 css-s83462"><thead style="    background: #ffffff0a;"><tr class="text-left uppercase"><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.id}</th><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.salary}</th><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.joined2}</th><th class="px-2 py-4 text-center text-xs font-semibold">${panelText?.endDate}</th></tr></thead><tbody id="giveawaysHistoryTd"></tbody></table></div></div></div></div>`)
+      ) // <p><a>${panelText?.settings_p2}: </a><a style="color: darkseagreen;" id="giveawayJoinsCount">0</a></p><a class="desc">${panelText?.settings_a2}</a>
+
+    $('#giveawayPagesWrapper').html(`<p>${panelText?.settings_p6}: <input placeholder="1" value="1" min="1" max="10" type="number" id="giveawayPages"></p><a class="desc">${panelText?.settings_a6}</a>`);
 
     if(autoGiveawayConfig?.winNotification)
       $('#notificationSwitch').prop('checked', true);
@@ -77,10 +79,12 @@ const createGiveawayListPanel = async() => {
       try { chrome.storage.sync.set({ autoGiveawayConfig: autoGiveawayConfigData }); } catch(e) {};
     });
 
-    if(autoGiveawayConfig?.minPrice)
-      $('#giveawayMinPrice').val(autoGiveawayConfig?.minPrice);
+      if(autoGiveawayConfig?.minPrice)
+        $('#giveawayMinPrice').val(autoGiveawayConfig?.minPrice);
+      if(autoGiveawayConfig?.pagesToCheck)
+        $('#giveawayPages').val(autoGiveawayConfig?.pagesToCheck);
 
-    $('#autoGiveawayButton').on('click', async() => {
+      $('#autoGiveawayButton').on('click', async() => {
       const autoGiveawayConfigData = await getAutoGiveawayConfigData();
       const checked = autoGiveawayConfigData?.active;
       $('#autoGiveawayButton').removeClass(checked ? 'button-primary' : 'button-light-green');
@@ -88,11 +92,12 @@ const createGiveawayListPanel = async() => {
       $('#autoGiveawayButton').text(checked ? panelText?.start : panelText?.disable);
       $('#giveawaySearch').css('display', checked ? 'none' : 'block');
       $('#main-view div.grid-stack.relative.grid.overflow-hidden').eq(4).css('display', checked ? 'block' : 'none')
-      autoGiveawayConfigData.active = !autoGiveawayConfigData?.active;
-      autoGiveawayConfigData.minPrice = $('#giveawayMinPrice')?.val();
-      try { chrome.storage.sync.set({ autoGiveawayConfig: autoGiveawayConfigData }); } catch(e) {};
-      createToast('info', checked ? 'autogiveaway_deactivate' : 'autogiveaway_active');
-    });
+        autoGiveawayConfigData.active = !autoGiveawayConfigData?.active;
+        autoGiveawayConfigData.minPrice = $('#giveawayMinPrice')?.val();
+        autoGiveawayConfigData.pagesToCheck = $('#giveawayPages')?.val();
+        try { chrome.storage.sync.set({ autoGiveawayConfig: autoGiveawayConfigData }); } catch(e) {};
+        createToast('info', checked ? 'autogiveaway_deactivate' : 'autogiveaway_active');
+      });
     refreshGiveawaysPanel(panelText);
 };
 

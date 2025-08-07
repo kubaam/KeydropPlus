@@ -153,10 +153,15 @@ const getCurrency = async() => {
 
 const getAutoGiveawayConfigData = async() => {
     const storageData = await getStorageData(1, 'autoGiveawayConfig');
-    if(storageData) return storageData;
+    if(storageData) {
+        if(!storageData?.pagesToCheck)
+            storageData.pagesToCheck = 1;
+        return storageData;
+    }
     const autoGiveawayConfigData = {
         active: false,
         winNotification: false,
+        pagesToCheck: 1,
         currentGiveaway: {
             id: null,
             deadlineTimestamp: null,
