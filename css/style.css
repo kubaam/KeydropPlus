@@ -346,11 +346,21 @@ tbody .fullTd {
 }
 
 .keydorp-plus-change-language {
+    display: inline-block;
+    height: 34px;
+    cursor: pointer;
+    filter: opacity(0.5);
     transition: 0.25s;
 }
 
-.keydorp-plus-change-language:hover {
+.keydorp-plus-change-language:hover,
+.keydorp-plus-change-language.active {
     filter: opacity(1) !important;
+}
+
+.keydorp-plus-change-language.active {
+    border: 1px solid gold;
+    border-radius: 4px;
 }
 
 div.hidden.overflow-hidden.md\:block.bg-navy-700 {
