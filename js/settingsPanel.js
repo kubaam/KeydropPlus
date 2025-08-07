@@ -5,97 +5,72 @@ $( document ).ready(async() => {
     const server = await getServerData();
     if(!server) return;
     await createSettingsPanel(config, language, server);
+    const attachToggle = (key, selector, { onInit, onChange } = {}) => {
+        if(config?.[key]) $(selector)?.prop('checked', true);
+        if(onInit) onInit(!!config?.[key]);
+        $(selector)?.on('change', function(e) {
+            const checked = e?.target?.checked;
+            config[key] = checked;
+            try { chrome.storage.sync.set({ config: config }); } catch(e) {};
+            if(onChange) onChange(checked);
+        });
+    };
 
     if(window?.location?.href?.includes('/#keydrop_plus'))
         $('div#keydrop-plus-modal')?.addClass('is-open');
 
     $('#keydrop-plus-modal').click(function(e) {
         if(e?.target?.id == 'close-keydrop-plus-modal' || e?.target?.id == "keydrop-plus-modal")
-            $('#keydrop-plus-modal')
-                .removeClass('is-open');
+            $('#keydrop-plus-modal').removeClass('is-open');
     });
 
-    if(config?.toastSoundEnable_error)
-        $('#toastSoundEnable_error')?.prop('checked', true);
-    $('#toastSoundEnable_error')?.on('change', function(e) {
-        config.toastSoundEnable_error = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
+    ['error','info','success','warning'].forEach(type => {
+        attachToggle(`toastSoundEnable_${type}`, `#toastSoundEnable_${type}`);
     });
 
-    if(config?.toastSoundEnable_info)
-        $('#toastSoundEnable_info')?.prop('checked', true);
-    $('#toastSoundEnable_info')?.on('change', function(e) {
-        config.toastSoundEnable_info = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
+    attachToggle('toastAutoHide', '#hideToast');
+
+    attachToggle('showAllYoutuberCases', '#showAllYoutuberCases', {
+        onChange: (checked) => {
+            $('.keydrop-plus-ytcases').css('display', checked ? 'block' : 'none');
+            $('[case-orginal="true"]').css('display', checked ? 'none' : 'block');
+        }
     });
 
-    if(config?.toastSoundEnable_success)
-        $('#toastSoundEnable_success')?.prop('checked', true);
-    $('#toastSoundEnable_success')?.on('change', function(e) {
-        config.toastSoundEnable_success = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
+    attachToggle('hideLiveDrop', '#hideLiveDrop', {
+        onInit: (checked) => {
+            if(checked)
+                waitForElm('div.flex.flex-col.overflow-hidden.bg-navy-900.lg\\:flex-row').then(() => {
+                    $('div.flex.flex-col.overflow-hidden.bg-navy-900.lg\\:flex-row')?.eq(0)?.css('display', 'none');
+                });
+        },
+        onChange: (checked) => {
+            $('div.flex.flex-col.overflow-hidden.bg-navy-900.lg\\:flex-row')?.eq(0)?.css('display', checked ? 'none' : 'flex');
+        }
     });
 
-    if(config?.toastSoundEnable_warning)
-        $('#toastSoundEnable_warning')?.prop('checked', true);
-    $('#toastSoundEnable_warning')?.on('change', function(e) {
-        config.toastSoundEnable_warning = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
+    attachToggle('hideCaseBattle', '#hideCaseBattle', {
+        onInit: (checked) => {
+            waitForElm('[data-testid="single-bttl-rounds-counter"]').then(() => {
+                if(checked) {
+                    $('div#caseList-root div.container.mb-8')?.eq(0)?.css('display', 'none');
+                    $('div#caseList-root div.mx-auto.max-w-screen-2xl.2xl\\:px-5')?.eq(0)?.css('margin-top', '50px');
+                }
+            });
+        },
+        onChange: (checked) => {
+            $('div#caseList-root div.container.mb-8')?.eq(0)?.css('display', checked ? 'none' : 'block');
+            $('div#caseList-root div.mx-auto.max-w-screen-2xl.2xl\\:px-5')?.eq(0)?.css('margin-top', checked ? '50px' : '0px');
+        }
     });
 
-    if(config?.toastAutoHide)
-        $('#hideToast')?.prop('checked', true);
-    $('#hideToast')?.on('change', function(e) {
-        config.toastAutoHide = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
-    });
-
-    if(config?.showAllYoutuberCases)
-        $('#showAllYoutuberCases')?.prop('checked', true);
-    $('#showAllYoutuberCases')?.on('change', function(e) {
-        $('.keydrop-plus-ytcases').css('display', e?.target?.checked ? 'block' : 'none');
-        $('[case-orginal="true"').css('display', e?.target?.checked ? 'none' : 'block');
-        config.showAllYoutuberCases = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
-    });
-
-    if(config?.hideLiveDrop) {
-        $('#hideLiveDrop')?.prop('checked', true);
-        waitForElm('div.flex.flex-col.overflow-hidden.bg-navy-900.lg\\:flex-row').then(() => {
-            if(config?.hideLiveDrop)
-                $('div.flex.flex-col.overflow-hidden.bg-navy-900.lg\\:flex-row')?.eq(0)?.css('display', 'none');
-        });
-    }
-    $('#hideLiveDrop')?.on('change', function(e) {
-        config.hideLiveDrop = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
-        $('div.flex.flex-col.overflow-hidden.bg-navy-900.lg\\:flex-row')?.eq(0)?.css('display', e?.target?.checked ? 'none' : 'flex');
-    });
-
-    if(config?.hideCaseBattle) {
-        $('#hideCaseBattle')?.prop('checked', true);
-        waitForElm('[data-testid="single-bttl-rounds-counter"]').then(() => {
-            if(!config?.hideCaseBattle)
-                return;
-            $('div#caseList-root div.container.mb-8')?.eq(0)?.css('display', 'none');
-            $('div#caseList-root div.mx-auto.max-w-screen-2xl.2xl\\:px-5')?.eq(0)?.css('margin-top', '50px');
-        });
-    }
-    $('#hideCaseBattle')?.on('change', function(e) {
-        config.hideCaseBattle = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
-        $('div#caseList-root div.container.mb-8')?.eq(0)?.css('display', e?.target?.checked ? 'none' : 'block');
-        $('div#caseList-root div.mx-auto.max-w-screen-2xl.2xl\\:px-5')?.eq(0)?.css('margin-top', e?.target?.checked ? '50px' : '0px');
-    });
-
-    if(config?.hideFavourite) {
-        $('#hideFavourite')?.prop('checked', true);
-        $('section#favorite')?.css('display', 'none');
-    }
-    $('#hideFavourite')?.on('change', function(e) {
-        config.hideFavourite = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); } catch(e) {};
-        $('section#favorite')?.css('display', e?.target?.checked ? 'none' : 'block');
+    attachToggle('hideFavourite', '#hideFavourite', {
+        onInit: (checked) => {
+            if(checked) $('section#favorite')?.css('display', 'none');
+        },
+        onChange: (checked) => {
+            $('section#favorite')?.css('display', checked ? 'none' : 'block');
+        }
     });
 
     $('#keydrop-plus-remove-data')?.on('click', function(e) {
@@ -120,13 +95,15 @@ $( document ).ready(async() => {
         try { chrome.storage.sync.set({ config: config }); refreshOdds(config, cases); } catch(e) {};
     });
 
-    $(`.keydorp-plus-change-language[data-lang="${config?.lang}"]`)
-        ?.css('filter', 'opacity(0.8)');
+    const langSelector = `.keydorp-plus-change-language[data-lang="${config?.lang}"]`;
+    $(langSelector).addClass('active');
 
     $('.keydorp-plus-change-language')?.click(function() {
         const lnagData = $(this)?.attr('data-lang');
         config.lang = lnagData;
         try{  chrome.storage.sync.set({ config: config }) } catch(e) {};
+        $('.keydorp-plus-change-language').removeClass('active');
+        $(this).addClass('active');
         window?.location?.reload();
     });
 });
@@ -169,7 +146,7 @@ const createSettingsPanel = async(config, language, server) => {
     server?.languages?.forEach(el => {
         $("#keydrop-plus-remove-data").before($(document.createElement('div'))
             .css({ display: "inline-table", width: "65px" })
-            .html(`<img class="keydorp-plus-change-language text-sm font-medium leading-snug text-red" data-lang="${el?.langFileName}" src="${el?.langImg}" style="height: 34px;filter: opacity(0.5);display: inline-block;cursor: pointer;"><p style="text-align: center;font-size: 9px;color: rgb(152 158 187/var(--tw-text-opacity));">${el?.langBy != null ? `${languageText?.by} ${el?.langBy}` : ""}</p>`)
+            .html(`<img class="keydorp-plus-change-language text-sm font-medium leading-snug text-red" data-lang="${el?.langFileName}" src="${el?.langImg}"><p style="text-align: center;font-size: 9px;color: rgb(152 158 187/var(--tw-text-opacity));">${el?.langBy != null ? `${languageText?.by} ${el?.langBy}` : ""}</p>`)
         ); 
     });
 };
