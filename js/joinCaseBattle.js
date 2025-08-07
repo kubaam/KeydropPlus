@@ -155,7 +155,7 @@ function autoJoinCaseBattle() {
         return createToast('error', 'autoJoinFreeCaseBattle_noPlayers');
     if(fastCaseBattleConfig?.casesName?.length <= 0) return createToast('error', 'autoJoinFreeCaseBattle_noCaseName');
 
-    try { chrome.storage.sync.set({ fastCaseBattleConfig: fastCaseBattleConfig }) } catch(e) {};
+    setStorageData('sync', { fastCaseBattleConfig: fastCaseBattleConfig });
     fastCaseBattleData = fastCaseBattleConfig;
 
     autoJoinActive = !autoJoinActive;

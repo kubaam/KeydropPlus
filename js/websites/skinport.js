@@ -42,7 +42,7 @@ const getSkins = async() => {
 
             marketJSON.currency = currency;
             marketJSON.updateTime = `${new Date().getTime()}`;
-            try { chrome.storage.local.set({skinportMarketJSON: marketJSON }); } catch(e) {};
+            setStorageData('local', {skinportMarketJSON: marketJSON });
             setTimeout(function() {
                 try {
                     open(`https://key-drop.com/skin-changer`, '_self');

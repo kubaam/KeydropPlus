@@ -72,12 +72,12 @@ const getGiveawayData = async(language, gConfig, port, token) => {
     gConfig.currentGiveaway.haveIJoined = false;
     gConfig.currentGiveaway.captcha = false;
     gConfig.currentGiveaway.maxPrice = null;
-    try { chrome.storage.sync.set({ autoGiveawayConfig: gConfig }); } catch(e) {};
+    setStorageData('sync', { autoGiveawayConfig: gConfig });
 
     const giveawaysHistory = await getStorageData('local', 'giveawaysHistory') || [];
     giveawaysHistory.push(giveaway);
 
-    try { chrome.storage.local.set({ giveawaysHistory: giveawaysHistory }); } catch(e) {};
+    setStorageData('local', { giveawaysHistory: giveawaysHistory });
     return gConfig;
 };
 
@@ -97,7 +97,7 @@ const findNewGiveaway = async(gConfig, port, token) => {
     gConfig.currentGiveaway.deadlineTimestamp = amateurGiveaways?.deadlineTimestamp;
     gConfig.currentGiveaway.haveIJoined = amateurGiveaways?.haveIJoined;
     gConfig.currentGiveaway.maxPrice = amateurGiveaways?.prizes[0]?.price;
-    try { chrome.storage.sync.set({ autoGiveawayConfig: gConfig }); } catch(e) {};
+    setStorageData('sync', { autoGiveawayConfig: gConfig });
     return gConfig;
 };
 
@@ -117,7 +117,7 @@ const joinGiveaway = async(language, gConfig, token) => {
     } else
         createToast('error', null, idText, giveawayUrl, `${language?.autogiveaway_error} ${fetch?.message}`);
 
-    try { chrome.storage.sync.set({ autoGiveawayConfig: gConfig }); } catch(e) {};
+    setStorageData('sync', { autoGiveawayConfig: gConfig });
     return gConfig;
 };
 

@@ -295,7 +295,7 @@ const caseDataCombine = async(caseJSON, languageText) => {
 
         const casesFetch = await fetchUrl('GET', `${githubUrl}/cases.json`)
         if(!casesFetch) return;
-        const cases = JSON.parse(`{"cases": ${casesFetch}}`)?.cases;
+        const cases = Array.isArray(casesFetch) ? casesFetch : casesFetch?.cases;
         if(!cases?.length) return;
 
         const goldenCases = cases?.filter(el => el?.goldProfit !== undefined);

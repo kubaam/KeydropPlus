@@ -14,37 +14,55 @@ $('body').append($(document.createElement('div'))
 
 const fetchUrl = async(type, url, token, noTime, data) => {
     try {
-        const result = await $.ajax({
-            type: type,
-            url: `${url}${noTime ? '' : `?t=${new Date().getTime()}`}`,
-            data: data ? JSON.stringify(data) : '',
-            beforeSend: async (xhr) => {
-                if(token)
-                    xhr.setRequestHeader('authorization', `Bearer ${token}`);
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15 * 1000);
+        const response = await fetch(`${url}${noTime ? '' : `?t=${Date.now()}`}`, {
+            method: type,
+            headers: {
+                'Content-Type': data ? 'application/json' : undefined,
+                ...(token ? { authorization: `Bearer ${token}` } : {})
             },
-            success: function (response, textStatus, jqXHR) {
-                if(!response) 
-                    return createToast('error', 'error_fetch');
-                return JSON.parse(JSON.stringify(response)) || undefined;
-            },
-            error: function(error) {
-                return;
-            }
+            body: data ? JSON.stringify(data) : undefined,
+            signal: controller.signal
         });
-        return result;
-    } catch(e) { if(e?.status == 403) return window?.location?.reload(); };
+        clearTimeout(timer);
+        if(response.status === 403) {
+            return window?.location?.reload();
+        }
+        const contentType = response.headers.get('content-type');
+        if(contentType && contentType.includes('application/json'))
+            return await response.json();
+        return await response.text();
+    } catch(e) {
+        return null;
+    }
 };
 
 const getStorageData = async(type, name) => {
     try {
-        const storageData = 
-            (type === 'local' || type === 0) ? await chrome.storage.local.get([name]).then((result) => { return result[name]; })
-                                    : await chrome.storage.sync.get([name]).then((result) => { return result[name] });
-        return storageData;
+        const storage = (type === 'local' || type === 0) ? chrome.storage.local : chrome.storage.sync;
+        const result = await storage.get([name]);
+        return result[name];
     } catch(e) {
-        return;// console.log(e);
-    };
-}
+        return;
+    }
+};
+
+const setStorageData = async(type, data) => {
+    try {
+        const storage = (type === 'local' || type === 0) ? chrome.storage.local : chrome.storage.sync;
+        await storage.set(data);
+        return true;
+    } catch(e) { return false; }
+};
+
+const clearStorageData = async(type) => {
+    try {
+        const storage = (type === 'local' || type === 0) ? chrome.storage.local : chrome.storage.sync;
+        await storage.clear();
+        return true;
+    } catch(e) { return false; }
+};
 
 const getIndexData = async() => {
     const storageData = await getStorageData(1, 'index');
@@ -59,7 +77,7 @@ const getIndexData = async() => {
         currency: fetch?.currency,
         currencyRates: fetch?.rates || [{id: 'EUR', rate: 1}, {id: 'PLN', rate: 5}, {id: 'USD', rate: 1}, {id: 'UAH', rate: 36.5}, {id: 'BRL', rate: 5.13}, {id: 'ARS', rate: 175}, {id: 'GBP', rate: 0.89}, {id: 'CZK', rate: 25.5}]
     };
-    try { chrome.storage.sync.set({ index: indexData }); } catch(e) {};
+    try { await setStorageData('sync', { index: indexData }); } catch(e) {};
     return indexData;
 };
 
@@ -89,7 +107,7 @@ const getConfigData = async() => {
     if(refreshedConfigData?.tokenExp && refreshedConfigData?.tokenExp > (new Date().getTime() + tokenExpiresTime)) {
         refreshedConfigData.token = null;
         refreshedConfigData.tokenExp = null;
-        try { chrome.storage.sync.set({ config: refreshedConfigData }); } catch(e) {};
+        try { await setStorageData('sync', { config: refreshedConfigData }); } catch(e) {};
         createToast('warning', 'warning_dateManipulated');
     }
     return refreshedConfigData;
@@ -103,13 +121,13 @@ const checkToken = async(config) => {
         config.token = fetch;
         config.tokenExp = timestamp + tokenExpiresTime;
     }
-    try { chrome.storage.sync.set({ config: config }); } catch(e) {};
+    try { await setStorageData('sync', { config: config }); } catch(e) {};
     return config;
 };
 
 
 const getServerData = async() => {
-    const fetch = JSON.parse(await fetchUrl('GET', `${githubUrl}/serverData.json`));
+    const fetch = await fetchUrl('GET', `${githubUrl}/serverData.json`);
     if(!fetch || !fetch?.current_versions) return;
     return fetch;
 };
@@ -127,9 +145,8 @@ const getLanguageData = async(lang) => {
     }
 
     const fetch = await fetchUrl('GET', `${githubUrl}/lang/${lang}.json`);
-    if(!fetch || fetch?.length <= 0) return;
-    const json = JSON.parse(fetch);
-    return json;
+    if(!fetch) return;
+    return fetch;
 };
 
 const getCookieValue = (cookieName) => {
@@ -146,7 +163,7 @@ const getCurrency = async() => {
     let currency = getCookieValue('currency');
     if (currency == null) {
         fetch = await fetchUrl('GET', 'https://key-drop.com/en/balance?skinsValue=true');
-        currency = JSON.parse(fetch)?.currency;
+        currency = fetch?.currency;
     }
     return currency || 'USD';
 }
@@ -169,7 +186,7 @@ const getAutoGiveawayConfigData = async() => {
             captcha: false
         },
     }
-    try { chrome.storage.sync.set({ autoGiveawayConfig: autoGiveawayConfigData }); } catch(e) {};
+    try { await setStorageData('sync', { autoGiveawayConfig: autoGiveawayConfigData }); } catch(e) {};
     return autoGiveawayConfigData;
 };
 
@@ -180,7 +197,7 @@ const getUserSkinsData = async(token) => {
     const totalMaxSkins = 999;
 
     do {
-        const fetch = JSON.parse(await fetchUrl('GET', `https://key-drop.com/en/panel/profil/my_winner_list?type=all&sort=newest&state=all&per_page=${totalMaxSkins}&current_page=${currentPage}?t=${new Date().getTime()}`, token));
+        const fetch = await fetchUrl('GET', `https://key-drop.com/en/panel/profil/my_winner_list?type=all&sort=newest&state=all&per_page=${totalMaxSkins}&current_page=${currentPage}?t=${new Date().getTime()}`, token);
         if(!fetch || !fetch?.total || fetch?.data?.length <= 0) return;
         totalUserSkins = fetch?.total || 1;
         if(currentPage == 1) userSkinsArray = fetch?.data;
@@ -364,7 +381,7 @@ const verifyUser = async() => {
       
     const configData = await getConfigData();
     configData.active = true;
-    chrome.storage.sync.set({ config: configData });
+    setStorageData('sync', { config: configData });
     return;
 };
 verifyUser();

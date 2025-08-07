@@ -11,7 +11,7 @@ $( document ).ready(async() => {
         $(selector)?.on('change', function(e) {
             const checked = e?.target?.checked;
             config[key] = checked;
-            try { chrome.storage.sync.set({ config: config }); } catch(e) {};
+            setStorageData('sync', { config: config });
             if(onChange) onChange(checked);
         });
     };
@@ -74,9 +74,9 @@ $( document ).ready(async() => {
     });
 
     $('#keydrop-plus-remove-data')?.on('click', function(e) {
-        try { chrome.storage.sync.clear(); } catch(e) {};
+        clearStorageData('sync');
         setTimeout(async() => {
-            try { chrome.storage.local.clear(); } catch(e) {};
+            clearStorageData('local');
             window?.location?.reload();
         }, 200);
     });
@@ -88,11 +88,12 @@ $( document ).ready(async() => {
         const config = await getConfigData();
         const casesFetch = await fetchUrl('GET', `${githubUrl}/cases.json`)
         if(!casesFetch || !config) return;
-        const cases = JSON.parse(`{"cases": ${casesFetch}}`)?.cases;
+        const cases = Array.isArray(casesFetch) ? casesFetch : casesFetch?.cases;
         if(!cases?.length) return;
 
         config.showJokerOdds = e?.target?.checked;
-        try { chrome.storage.sync.set({ config: config }); refreshOdds(config, cases); } catch(e) {};
+        setStorageData('sync', { config: config });
+        refreshOdds(config, cases);
     });
 
     const langSelector = `.keydorp-plus-change-language[data-lang="${config?.lang}"]`;
@@ -101,7 +102,7 @@ $( document ).ready(async() => {
     $('.keydorp-plus-change-language')?.click(function() {
         const lnagData = $(this)?.attr('data-lang');
         config.lang = lnagData;
-        try{  chrome.storage.sync.set({ config: config }) } catch(e) {};
+        setStorageData('sync', { config: config });
         $('.keydorp-plus-change-language').removeClass('active');
         $(this).addClass('active');
         window?.location?.reload();

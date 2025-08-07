@@ -76,7 +76,7 @@ const createGiveawayListPanel = async() => {
       const autoGiveawayConfigData = await getAutoGiveawayConfigData();
       if(!autoGiveawayConfigData) return;
       autoGiveawayConfigData.winNotification = e?.target?.checked;
-      try { chrome.storage.sync.set({ autoGiveawayConfig: autoGiveawayConfigData }); } catch(e) {};
+      setStorageData('sync', { autoGiveawayConfig: autoGiveawayConfigData });
     });
 
       if(autoGiveawayConfig?.minPrice)
@@ -95,7 +95,7 @@ const createGiveawayListPanel = async() => {
         autoGiveawayConfigData.active = !autoGiveawayConfigData?.active;
         autoGiveawayConfigData.minPrice = $('#giveawayMinPrice')?.val();
         autoGiveawayConfigData.pagesToCheck = $('#giveawayPages')?.val();
-        try { chrome.storage.sync.set({ autoGiveawayConfig: autoGiveawayConfigData }); } catch(e) {};
+        setStorageData('sync', { autoGiveawayConfig: autoGiveawayConfigData });
         createToast('info', checked ? 'autogiveaway_deactivate' : 'autogiveaway_active');
       });
     refreshGiveawaysPanel(panelText);
@@ -127,7 +127,7 @@ const refreshGiveawaysPanel = async(panelText) => {
 
   if(giveawaysHistory?.length >= 100) {
     giveawaysHistory = giveawaysHistory?.slice(1, 100);
-    try { chrome.storage.local.set({ giveawaysHistory: giveawaysHistory }); } catch(e) {};
+    setStorageData('local', { giveawaysHistory: giveawaysHistory });
   }
 
   // let joinsCount = 20;
@@ -166,7 +166,7 @@ const refreshGiveawaysPanel = async(panelText) => {
     $('#autoGiveawayButton').text(panelText?.start);
     $('#giveawaySearch').css('display', 'none');
     $('#main-view div.grid-stack.relative.grid.overflow-hidden').eq(4).css('display', 'block');
-    try { chrome.storage.sync.set({ autoGiveawayConfig: autoGiveawayConfig }); } catch(e) {};
+    setStorageData('sync', { autoGiveawayConfig: autoGiveawayConfig });
   }*/
 
   if(autoGiveawayConfig?.active) {
