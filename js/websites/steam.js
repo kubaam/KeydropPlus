@@ -57,7 +57,7 @@ const loadSteamSkins = (langText) => {
                     loadSteamSkins(langText);
                 } else {
                     marketJSON.updateTime = `${new Date().getTime()}`;
-                    try { chrome.storage.local.set({steamMarketJSON: marketJSON}); } catch(e) {};
+                    setStorageData('local', {steamMarketJSON: marketJSON});
                     setTimeout(() => {
                         try {
                             open(`https://key-drop.com/skin-changer`, '_self');

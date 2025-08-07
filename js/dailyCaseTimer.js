@@ -61,7 +61,7 @@ const createSkinsValueDiv = async() => {
 
         const fetch = await fetchUrl("GET", "https://key-drop.com/en/panel/profil/eq_value");
         if(!fetch) return;
-        const data = JSON.parse(fetch);
+        const data = fetch;
         const skinsValue = `${(data?.fullPrice).toFixed(2).toString().replace('.',',')} ${data?.currency}`;
 
         $('div[data-testid="balance"]')

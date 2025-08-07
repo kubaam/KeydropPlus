@@ -2,7 +2,7 @@ $( document ).ready(async() => {
     const config = await getConfigData();
     const casesFetch = await fetchUrl('GET', `${githubUrl}/cases.json`)
     if(!casesFetch || !config) return;
-    const cases = JSON.parse(`{"cases": ${casesFetch}}`)?.cases;
+    const cases = Array.isArray(casesFetch) ? casesFetch : casesFetch?.cases;
     if(!cases?.length) return;
 
     waitForElm('section#gold-area').then(async() => {

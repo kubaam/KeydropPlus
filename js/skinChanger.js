@@ -209,7 +209,7 @@ const createMenu = async(language) => {
         try {
             const config = await getConfigData();
             config.skinportPrice = e?.target?.checked;
-            await chrome.storage.sync.set({ config: config });
+            await setStorageData('sync', { config: config });
             refreshPrices();
         } catch(e) {};
     });
@@ -225,7 +225,7 @@ const createMenu = async(language) => {
         try {
             const config = await getConfigData();
             config.steamPrice = e?.target?.checked;
-            await chrome.storage.sync.set({ config: config });
+            await setStorageData('sync', { config: config });
             refreshPrices();
         } catch(e) {};
     });

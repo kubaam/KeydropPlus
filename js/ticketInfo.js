@@ -9,7 +9,7 @@ $( document ).ready(async() => {
 
 const createTicketsInfo = async() => {
     const fetch = await fetchUrl('GET', 'https://key-drop.com/en/balance?battleTickets=1');
-    const data = JSON.parse(fetch);
+    const data = fetch;
     const tickets = data?.caseBattleTickets; 
 
     $('div a[href="#gold-area"]').after($(document.createElement('a'))
