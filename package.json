@@ -4,7 +4,7 @@
   "description": "Unofficial extension for keydrop.com that adds helpful features and improvements.",
   "main": "js/main.js",
   "scripts": {
-    "lint": "eslint js/main.js",
+    "lint": "eslint js/main.js js/utils.js",
     "format": "prettier --check README.md"
   },
   "dependencies": {
