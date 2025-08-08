@@ -103,6 +103,18 @@ const clearStorageData = async(type) => {
 };
 
 /**
+ * Format a numeric value as a currency string.
+ *
+ * @param {number} value    Numeric value to format
+ * @param {string} currency ISO currency code
+ * @param {string} [locale='en-US'] Locale for formatting
+ * @returns {string} Formatted currency string
+ */
+const formatCurrency = (value, currency, locale = 'en-US') => {
+    return `${new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)} ${currency}`;
+};
+
+/**
  * Retrieve user index data from storage or remote endpoint.
  * Cached values expire after a predefined period.
  *
@@ -214,14 +226,20 @@ const getCookieValue = (cookieName) => {
     return null;
 }
 
+/**
+ * Determine the user's currency either from cookie or remote endpoint.
+ * Falls back to USD when unavailable.
+ *
+ * @returns {Promise<string>} ISO currency code
+ */
 const getCurrency = async() => {
     let currency = getCookieValue('currency');
-    if (currency == null) {
-        fetch = await fetchUrl('GET', 'https://key-drop.com/en/balance?skinsValue=true');
-        currency = fetch?.currency;
+    if (!currency) {
+        const balanceData = await fetchUrl('GET', 'https://key-drop.com/en/balance?skinsValue=true');
+        currency = balanceData?.currency;
     }
     return currency || 'USD';
-}
+};
 
 /**
  * Retrieve auto-giveaway configuration or initialize defaults.
@@ -355,21 +373,35 @@ const createNotifications = async(text, url, newTab) => {
     });
 };
 
-const waitForElm = async(selector) => {
+/**
+ * Wait for a DOM element matching the selector to appear.
+ * Resolves with `null` if the element does not appear within the timeout.
+ *
+ * @param {string} selector CSS selector to watch for
+ * @param {number} [timeout=0] Maximum time to wait in milliseconds; 0 disables timeout
+ * @returns {Promise<Element|null>} Found element or null on timeout
+ */
+const waitForElm = async(selector, timeout = 0) => {
     return new Promise(resolve => {
-        if(document.querySelector(selector)) {
-            return resolve(document.querySelector(selector));
-        };
-        const observer = new MutationObserver(mutations => {
-            if(document.querySelector(selector)) {
-                resolve(document.querySelector(selector));
+        const initial = document.querySelector(selector);
+        if(initial) return resolve(initial);
+
+        const observer = new MutationObserver(() => {
+            const element = document.querySelector(selector);
+            if(element) {
                 observer.disconnect();
+                resolve(element);
             }
         });
-        observer.observe(document.body, {
-            childList: true,
-            subtree: true
-        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        if(timeout > 0) {
+            setTimeout(() => {
+                observer.disconnect();
+                resolve(null);
+            }, timeout);
+        }
     });
 };
 
