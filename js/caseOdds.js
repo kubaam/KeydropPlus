@@ -20,6 +20,22 @@ $( document ).ready(async() => {
     addObserverIfDesiredNodeAvailable();
 });
 
+const goldProfitThresholds = [
+    { max: 11111111, label: '0/5' },
+    { max: 13209876, label: '0.5/5' },
+    { max: 15308641, label: '1/5' },
+    { max: 17407407, label: '1.5/5' },
+    { max: 19506172, label: '2/5' },
+    { max: 21604937, label: '2.5/5' },
+    { max: 23703703, label: '3/5' },
+    { max: 25802468, label: '3.5/5' },
+    { max: 27901233, label: '4/5' },
+    { max: 29999999, label: '4.5/5' },
+    { max: Infinity, label: '5/5' },
+];
+
+const calculateGoldOdds = (profit) => goldProfitThresholds.find(t => profit <= t.max).label;
+
 const refreshOdds = async(config, cases, init) => {
     const index = await getIndexData();
     const currencyRates = index?.currencyRates;
@@ -62,49 +78,23 @@ const createCaseOdds = async(config, currentRate, currency, cases, thisElement, 
     const caseName = $(thisElement)?.find('div[data-testid=case-card-badge-btn] p')?.last()?.text();
     if(!caseName) return;
 
-    let odds;
     const jokerCase = config?.showJokerOdds ? cases?.filter(el => el?.name == `${caseName} JOKER`) : null;
-    const thisCase = config?.showJokerOdds && jokerCase && jokerCase?.length ? jokerCase : cases?.filter(el => el?.name == caseName);
-    if(!thisCase || !thisCase?.length) return;
-    if (thisCase[0]?.goldProfit !== undefined) {
-        const profit = thisCase[0]?.goldProfit;
-        if(profit <= 11111111)
-            odds = `0/5`;
-        else if(profit <= 13209876)
-            odds = `0.5/5`;
-        else if(profit <= 15308641)
-            odds = `1/5`;
-        else if(profit <= 17407407)
-            odds = `1.5/5`;
-        else if(profit <= 19506172)
-            odds = `2/5`;
-        else if(profit <= 21604937)
-            odds = `2.5/5`;
-        else if(profit <= 23703703)
-            odds = `3/5`;
-        else if(profit <= 25802468)
-            odds = `3.5/5`;
-        else if(profit <= 27901233)
-            odds = `4/5`;
-        else if(profit <= 29999999)
-            odds = `4.5/5`;
-        else
-            odds = `5/5`;
-    } else
-        odds = `${thisCase[0]?.odds}%`;
+    const thisCaseArr = config?.showJokerOdds && jokerCase && jokerCase?.length ? jokerCase : cases?.filter(el => el?.name == caseName);
+    const caseData = thisCaseArr?.[0];
+    if(!caseData) return;
 
-    const isJoker = thisCase[0]?.name?.endsWith(' JOKER') || false;
-    const cardEl = $(thisElement)?.find(eventCase ? 'div[data-testid="case-card-price-btn"]' : 'div.absolute.right-3.rounded.bg-navy-900.px-3.text-xs.font-semibold.text-gold-500')
-        ?.eq(0);
-        
+    const odds = caseData?.goldProfit !== undefined ? calculateGoldOdds(caseData.goldProfit) : `${caseData?.odds}%`;
+    const isJoker = caseData?.name?.endsWith(' JOKER') || false;
+    const cardEl = $(thisElement)?.find(eventCase ? 'div[data-testid="case-card-price-btn"]' : 'div.absolute.right-3.rounded.bg-navy-900.px-3.text-xs.font-semibold.text-gold-500')?.eq(0);
+
     if (init)
         $(cardEl).after($(document?.createElement('div'))
             ?.addClass(eventCase ? 'cardOdds absolute right-3 top-3 rounded bg-navy-900 px-3 py-1.5 text-xs font-semibold text-white' : 'cardOdds absolute right-3 rounded bg-navy-900 px-3 py-1.5 text-xs font-semibold text-gold-500')
             ?.css({ 'margin-top': eventCase ? '35px' : '45px', 'background': isJoker ? 'rgb(129 72 234)' : 'rgb(23 23 28)' })
-            ?.text($(thisElement)?.attr('case-orginal') ? odds : (thisCase[0]?.lang || odds))
+            ?.text($(thisElement)?.attr('case-orginal') ? odds : (caseData?.lang || odds))
         );
 
-    $(thisElement)?.find('.cardOdds')?.text($(thisElement)?.attr('case-orginal') ? odds : (thisCase[0]?.lang || odds))
+    $(thisElement)?.find('.cardOdds')?.text($(thisElement)?.attr('case-orginal') ? odds : (caseData?.lang || odds))
     $(thisElement)?.find('.cardOdds')?.css({ 'background': isJoker ? 'rgb(129 72 234)' : 'rgb(23 23 28)' })
 
     $(thisElement)?.find('div[data-testid=case-card-badge-btn] p')
@@ -121,12 +111,7 @@ const createCaseOdds = async(config, currentRate, currency, cases, thisElement, 
     $(thisElement)?.find('div.css-hmmmg1')
         ?.css({ 'background': isJoker ? 'rgb(129 72 234)' : 'rgb(23 23 28)' })
 
-    const formattedPrice = new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-        }).format(thisCase[0]?.price_USD * currentRate);
-
-    const priceText = `${formattedPrice} ${currency}`;
+    const priceText = formatCurrency(caseData?.price_USD * currentRate, currency);
     if (isJoker || !init)
         $(thisElement)?.find('[data-testid="case-card-price-btn"]')
             ?.text(priceText);
@@ -138,12 +123,7 @@ const createYTcases = async(currentRate, currency, cases) => {
     if(!YTcases || !YTcases?.length) return;
 
     YTcases?.forEach(el => {
-        const formattedPrice = new Intl.NumberFormat('en-US', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-            }).format(el?.price_USD * currentRate);
-    
-        const priceText = `${formattedPrice} ${currency}`;
+        const priceText = formatCurrency(el?.price_USD * currentRate, currency);
         $('section#youtubers-cases div.grid.gap-6')?.eq(0)?.append($(document.createElement('div'))
             ?.addClass("keydrop-plus-ytcases group relative transition-all duration-200 will-change-transform hover:-translate-y-0.5 aspect-[270/375] col-span-2")
             ?.html(`<div data-testid="case-card-container" class="grid h-full w-full transform grid-cols-1 grid-rows-1 rounded-[6px] hover:shadow-case-hover shadow-case"><a href="${el?.url}" class="z-20 col-start-1 row-start-1 row-end-3 h-full w-full"><div class="group"><img alt="" class="absolute right-0 top-0 w-full h-full object-cover rounded-[6px]" loading="lazy" src="${el?.img}"></div><div class="z-10 flex w-full flex-col" style="height: 100%;"><div data-testid="case-card-price-btn" class="absolute right-3 top-3 rounded bg-navy-800 px-3 py-1.5 text-sm font-semibold text-gold-500">${priceText}</div><div class="absolute right-3 top-3 rounded bg-navy-900 px-3 py-1.5 text-xs font-semibold text-white" style="margin-top: 35px;">${el?.odds}%</div><div data-testid="case-card-badge-btn" class="z-10 mx-auto mb-4 mt-auto flex min-w-[8rem] max-w-full items-center rounded bg-navy-800 text-sm font-semibold uppercase text-white justify-between p-0 pl-3 text-left css-lh0t43"><div><p class="rounded-lg min-w-[8rem] max-w-full p-2 text-center text-sm font-normal uppercase leading-none text-white" style="margin-top: -4px;">${el?.name}</p></div><div><button class="button button-primary flex h-[36px] w-[36px] items-center justify-center rounded-md p-0 text-white transition-all duration-300 hover:text-gold group border-none bg-transparent hover:bg-transparent" data-testid="favorite-button"><img src="https://key-drop.com/web/KD/static/images/favorite-off.svg?v=159" alt="favorite icon not checked" class="object-contain transition-all group-hover:brightness-75 h-4 w-4"></button></div></div></div></a></div>`)
