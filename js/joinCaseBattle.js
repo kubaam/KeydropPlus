@@ -66,7 +66,13 @@ const createAutoCaseBattlePanel = async() => {
 
 let lastCaseBattleId;
 const findFreeCaseBattle = async(fastCaseBattleConfig) => {
-    const fetch = await fetchUrl('GET', 'https://key-drop.app/v2/battle?type=active&page=0&priceFrom=0&priceTo=undefined&searchText=&sort=latest&roundsCount=all', null, true);
+    // Request all active battles without limiting price or round count
+    const fetch = await fetchUrl(
+        'GET',
+        'https://key-drop.app/v2/battle?type=active&page=0&priceFrom=0&searchText=&sort=latest',
+        null,
+        true
+    );
     if(!fetch || !fetch?.data) return 'end';
 
     let filtered = await fetch?.data?.filter(el => el?.status == 'new' && el?.roundsCount >= fastCaseBattleConfig?.minCaseCount && el?.users?.length == 0 && el?.isFreeBattle == true && (fastCaseBattleConfig?.casesName?.includes(el?.cases[0]?.name) || fastCaseBattleConfig?.casesName?.includes(el?.cases[1]?.name)));
