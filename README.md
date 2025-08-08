@@ -1,4 +1,3 @@
-
 <img width="2200px" src="https://raw.githubusercontent.com/Juzlus/KeydropPlus/main/data/icons/Keydrop%2B_Icon.svg">
 
 <div align="center">
@@ -11,7 +10,6 @@
 # 🤔 About
 
 KeydropPlus v2 is an unofficial extension for [keydrop.com](https://key-drop.com/) that adds new features and improves the user interface.
-
 
 ## 💡 List of current functions
 
@@ -27,7 +25,6 @@ KeydropPlus v2 is an unofficial extension for [keydrop.com](https://key-drop.com
 - Display of pre-selected user giveaways.
 - Automatic clicking on the receive gold code button at the 'direct link' (?code=).
 
-
 ## 📁 How to add an extension
 
 1. Extract the files to a folder
@@ -35,7 +32,6 @@ KeydropPlus v2 is an unofficial extension for [keydrop.com](https://key-drop.com
 3. Enable developer mode
 4. Click the "Upload unzipped" button
 5. Select the folder with the extracted extension
-
 
 ## 🌐 Works on these browsers
 
@@ -46,7 +42,6 @@ KeydropPlus v2 is an unofficial extension for [keydrop.com](https://key-drop.com
 - Brave Browser
 - And others based on Chromium
 
-
 ## 🌍 Available languages
 
 - English
@@ -56,20 +51,20 @@ KeydropPlus v2 is an unofficial extension for [keydrop.com](https://key-drop.com
 ## 🛠️ Configuration - Correctly setting prices from Steam
 
 To get everything working without a problem, you need to:
+
 - Set the currency on the key-drop page to PLN, EUR or USD
 - Log in to Steam in your browser and set the currency to PLN, EUR or USD
 
 _Refreshing prices too often can temporarily block the Steam Market API._
 
-
 ## ✨ Usage
+
 - [Keydrop API](key-drop.com)
 - [Steam API](https://steamcommunity.com/market/)
 - [Skinport API](https://docs.skinport.com/#introduction)
 - [crypto-js](https://github.com/brix/crypto-js)
 - [jQuery](https://jquery.com)
 - [Chart.js](https://github.com/chartjs/Chart.js)
-
 
 ## 🔥 Screenshots
 
@@ -78,13 +73,28 @@ _Refreshing prices too often can temporarily block the Steam Market API._
 ![Fast Case Battle](https://github.com/Juzlus/KeydropPlus/assets/41649887/45e23d0b-6921-4efd-9731-c9cb62b7c138)
 ![User Statistics](https://github.com/Juzlus/KeydropPlus/assets/41649887/72eeef42-09a5-44eb-a13d-75f7d42ec80a)
 
+## 🧑‍💻 Development
+
+This project uses Node.js tooling to keep the codebase consistent.
+
+```bash
+npm install      # install dependencies
+npm run lint     # check JavaScript style
+npm run format   # verify formatting
+```
+
+## 🤝 Contributing
+
+Issues and feature requests are tracked on the [GitHub issue tracker](https://github.com/Juzlus/KeydropPlus/issues).
+
+Pull requests are welcome! Please fork the repository, create a topic branch for your work and open a pull request. Remember to run the linter and formatter before submitting.
 
 ## 📝 Feedback
 
 If you have any Feedback or questions, please contact me at juzlus.biznes@gmail.com or [Discord](https://discordapp.com/users/284780352042434570).
 
-
 ## 💝 Donate
+
 <span>
   <a href="https://www.buymeacoffee.com/juzlus" target="_blank" alt="buymeacoffee" style="width: 40%; text-decoration: none; margin-right: 20px;">
     <img src="https://www.codehim.com/wp-content/uploads/2022/09/bmc-button-640x180.png" style="height: 60px;">
@@ -95,10 +105,8 @@ If you have any Feedback or questions, please contact me at juzlus.biznes@gmail.
   </a>
 </span>
 
-
 ## ⚠️ Disclaimer
 
 _The KeydropPlus v2 is an independent project developed by an individual and is not endorsed or affiliated with [key-drop.com](https://key-drop.com/)._
 
 _The author of the extension is not responsible for any consequences resulting from its use._
-
